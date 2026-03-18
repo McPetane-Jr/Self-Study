@@ -1,4 +1,6 @@
 package Traversals;
+
+
 //Creating a node class for a binary search tree
 public class Node {
 
@@ -14,3 +16,4 @@ public class Node {
     }
     
 }
+
