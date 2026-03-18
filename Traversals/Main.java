@@ -1,8 +1,9 @@
-
+import Traversals.Node;
+import Traversals.BinarySearchTree;
 public class Main {
     public static void main(String[] args) {
         BinarySearchTree bst = new BinarySearchTree(); //Create a new binary search tree
-        Node node1 = new Node(10); //Create a new node with value 10
+        //Node node1 = new Node(10); //Create a new node with value 10
         //Insert some values into the tree
         bst.insert(new Node(10));
         bst.insert(new Node(5));
