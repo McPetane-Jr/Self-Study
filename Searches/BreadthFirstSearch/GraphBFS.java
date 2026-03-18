@@ -1,13 +1,15 @@
 package Graphs.AdjacencyMatrix;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
-public class Graph {
+public class GraphBFS {
 
     int[][] matrix;
     ArrayList<Node> nodes = new ArrayList<>();
 
-    Graph(int size) {
+    GraphBFS(int size) {
         matrix = new int[size][size];
         
     }
@@ -51,4 +53,29 @@ public class Graph {
         }
     }
 
+    public void breadthFirstFirstSearch(int start){
+        boolean[] visited = new boolean[matrix.length];
+        Queue<Integer> queue = new LinkedList<>();
+
+        //Add the starting node to the queue and mark it as visited
+        queue.add(start);
+        visited[start] = true;
+
+        //Continue the search until the queue is empty
+        while(!queue.isEmpty()){
+
+            //Remove the first node from the queue and print it
+            start = queue.poll(); //This removes the first element from the queue and returns
+            System.out.print(nodes.get(start).value + " => visited");
+
+            //loop thru the adjacency matrix row for the current node
+            //If there is an edge and the node has not been visited, add it to the queue and mark it as visited
+            for(int i = 0; i < matrix[start].length; i++){
+                //Check if there is an edge and if the node has not been visited
+                if(matrix[start][i] == 1 && !visited[i]){
+                    queue.add(i); //Add the node to the queue
+                    visited[i] = true; //Mark the node as visited
+                }
+
+    }
 }
