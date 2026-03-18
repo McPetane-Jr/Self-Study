@@ -2,12 +2,12 @@ package Graphs.AdjacencyMatrix;
 
 import java.util.ArrayList;
 
-public class Graph {
+public class GraphDFS {
 
     int[][] matrix;
     ArrayList<Node> nodes = new ArrayList<>();
 
-    Graph(int size) {
+    GraphDFS(int size) {
         matrix = new int[size][size];
         
     }
@@ -50,5 +50,35 @@ public class Graph {
             System.out.println();
         }
     }
+
+    public void depthFirstSearch(int start) {
+        boolean[] visited = new boolean[matrix.length];
+        dfsHelper(start, visited);
+    
+}
+
+    private void dfsHelper(int start, boolean[] visited) {
+
+        //Checking if the current node has already been visited to avoid cycles and infinite recursion
+        if (visited[start]) {
+            return;
+        }
+        else {
+            visited[start] = true; // Mark the current node as visited
+            System.out.print(nodes.get(start).value + " visited"); // Process the current node (e.g., print its value)
+        }
+            // Recursively visit all adjacent nodes
+        for (int i = 0; i < matrix[start].length; i++) {
+
+            //the start index represents the current node
+            //the i index represents the adjacent nodes (columns in the adjacency matrix)
+            if (matrix[start][i] == 1) { // Check if there is an edge from the current node to node i
+                
+                dfsHelper(i, visited); // Recursively visit node i
+            }
+        }
+        return;
+    }
+
 
 }
