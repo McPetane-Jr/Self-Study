@@ -65,9 +65,9 @@ These are the first jobs for your workflow:
 3. No secrets in plaintext: a scan for passwords or keys.
 4. Terraform and Ansible are tidy: formatting and lint checks.
 
-### Steps taken
+### Creating YAML Check
 
-1. Made the branch
+#### 1. Made the branch
 
 #### 2. Created the github workflow
 
@@ -158,7 +158,12 @@ rules:
 - -c .yamllint.yaml means “use the config file at this path” (-c is for config).
 
 Which then worked
-3.
-4. 
+
+---
+
+
+#### 3. Staged branch and pushed it
+After pushing the branch I sent a PR and waited for peer review from Kieren.
+
 
 
