@@ -321,3 +321,51 @@ grafana-dashboard-platform-health   1      56m
 Our entire Prometheus + Grafana + dashboard stack (Steps 1–4 of Week 3) is complete, we are moving to Part B: **Wazuh and Suricata** (Step 5 of Week 3). 
 
 First, we are checking what Ansible playbooks and inventory files already exist in infrastructure/ansible/ so we know whether wazuh-agents.yml, edge.yml, or security.yml is already built and ready to run.
+
+## Step 1: Get exact VM private IPs & check edge-01 status (on WSL)
+
+Before we write the Ansible playbooks for Wazuh Manager, Wazuh Agents, and Suricata IDS, we need the exact private IP addresses of all 5 VMs (edge-01, api-lb-01, k8s-cp-01, k8s-worker-01, k8s-worker-02) so we can create your local inventories/private/hosts.yml file and verify SSH connectivity from your laptop to every node.
+
+1. Checked infrastructure/ansible/ files:
+
+    - We listed infrastructure/ansible/ and confirmed what exists: ansible.cfg, inventories/example/hosts.yml, and Week 1/2 playbooks (bootstrap.yml, edge.yml, api-lb.yml, kubernetes-prereqs.yml, kubernetes.yml, argocd.yml).
+
+    - Neither wazuh-agents.yml nor security.yml exists yet (and edge.yml only covers Week 1/2 WireGuard + dnsmasq + nftables), so we will add the Wazuh Manager, Wazuh Agent, and Suricata IDS playbooks cleanly on a feature/week3-wazuh-suricata branch.
+
+2. **Checked WireGuard VPN & SSH access to edge-01:**
+
+    - Confirmed from wg show wg0 that your WireGuard VPN routes 10.200.0.0/24 and 172.26.1.0/24, meaning edge-01 is reached from your laptop at 10.200.0.1 (while its internal private IP for Wazuh agents is 172.26.0.10).
+
+    - Shared your SSH public key with your team, got it added to edge-01, and logged into edge-01 successfully.
+
+3. **Inspected edge-01 & mapped all 5 VMs:**
+
+    - Confirmed edge-01 has eth0 (172.26.0.10/24), wg0 (10.200.0.1/24), 10 GiB free RAM, 48 GiB free disk, permissive nftables forward rules, and that wazuh-manager and suricata are currently inactive (not installed yet).
+
+    - Confirmed all 5 VM IPs:
+        - edge-01: 10.200.0.1 (VPN) / 172.26.0.10 (internal)
+        - api-lb-01: 172.26.1.10
+        - k8s-cp-01: 172.26.1.11
+        - k8s-worker-01: 172.26.1.21
+        - k8s-worker-02: 172.26.1.22
+
+4. **Set up local Ansible inventory & verified SSH/Ansible connectivity:**
+
+- Installed ansible (ansible-core) on your WSL laptop.
+
+- Created your local gitignored infrastructure/ansible/inventories/private/hosts.yml with all 5 hosts.
+
+- Ran ansible ... -m ping: edge-01 and k8s-cp-01 succeeded (pong); api-lb-01, k8s-worker-01, and k8s-worker-02 still need your teammate to add your SSH public key to their ~rocky/.ssh/authorized_keys.
+
+---
+
+**Where We Are Right Now (Deployment Order & Week 3 Checklist)**
+Deployment Order Step 5 & 6 (Part B — Wazuh and Suricata):
+
+St**ep** 5: Ansible: Wazuh agents + edge Wazuh Manager — we are right here (building & running the playbooks so edge-01 runs Wazuh Manager and enrolls agents).
+
+**Step 6**: Ansible: Suricata on edge in IDS mode — right alongside Step 5 on edge-01.
+
+---
+
+**Completed so far**: Deployment Order Steps 1–4 (Part A: Prometheus, Grafana, persistent storage, and 3 Git-managed dashboards are all live and verified).
