@@ -316,3 +316,8 @@ grafana-dashboard-platform-health   1      56m
 ```
 ---
 
+# Part B — Wazuh and Suricata
+
+Our entire Prometheus + Grafana + dashboard stack (Steps 1–4 of Week 3) is complete, we are moving to Part B: **Wazuh and Suricata** (Step 5 of Week 3). 
+
+First, we are checking what Ansible playbooks and inventory files already exist in infrastructure/ansible/ so we know whether wazuh-agents.yml, edge.yml, or security.yml is already built and ready to run.
