@@ -245,3 +245,74 @@ yamllint passed (exit code: 0, only line-length warnings on the PromQL strings i
 ---
 
 We created the Argo CD Application (monitoring-dashboards.yaml) and three Grafana dashboard ConfigMaps (node-health, k8s-health, and platform-health) in gitops/resources/monitoring/, passed yamllint (exit code: 0), and pushed feature/week3-dashboards to GitHub—so once this PR merges, Argo CD will deploy those ConfigMaps and Grafana's sidecar will automatically load all three dashboards with zero manual clicking in the UI.
+
+## Push & Clean
+1. Tested and pushed:
+```
+yamllint -c .yamllint.yaml gitops/; echo "exit code: $?"
+git add gitops/applications/monitoring-dashboards.yaml gitops/resources/monitoring/
+git status
+git commit -m "feat(observability): add Git-managed Grafana dashboards via Argo CD"
+git push -u origin feature/week3-dashboards
+```
+2. Requested a PR, then it got merged
+3. **Tidy your laptop (~/collab-agent-scc26 on WSL)**
+```
+cd ~/collab-agent-scc26
+git switch dev
+git pull --ff-only
+git branch -d feature/week3-dashboards
+```
+
+## Verify Argo CD, ConfigMaps, and Grafana loaded all 3 dashboards (on k8s-cp-01)
+
+checking on k8s-cp-01 that Argo CD synced all three dashboard ConfigMaps into monitoring and querying Grafana's API to prove Grafana automatically discovered and loaded all three dashboards (scc26-node-health, scc26-k8s-health, and scc26-platform-health).
+
+```
+export KUBECONFIG=/home/rocky/.kube/config
+kubectl -n argocd get applications
+kubectl -n monitoring get configmap -l grafana_dashboard=1
+
+GRAFANA_PASS=$(kubectl -n monitoring get secret grafana-admin -o jsonpath='{.data.admin-password}' | base64 -d)
+kubectl -n monitoring port-forward svc/grafana 13000:80 >/dev/null 2>&1 &
+PF_PID=$!
+sleep 2
+curl -s -u "admin:${GRAFANA_PASS}" 'http://127.0.0.1:13000/api/search?type=dash-db' && echo ""
+kill $PF_PID 2>/dev/null || true
+unset GRAFANA_PASS
+```
+
+**Output**:
+```
+[rocky@k8s-cp-01 ~]$ export KUBECONFIG=/home/rocky/.kube/config
+kubectl -n argocd get applications
+kubectl -n monitoring get configmap -l grafana_dashboard=1
+
+GRAFANA_PASS=$(kubectl -n monitoring get secret grafana-admin -o jsonpath='{.data.admin-password}' | base64 -d)
+kubectl -n monitoring port-forward svc/grafana 13000:80 >/dev/null 2>&1 &
+PF_PID=$!
+sleep 2
+curl -s -u "admin:${GRAFANA_PASS}" 'http://127.0.0.1:13000/api/search?type=dash-db' && echo ""
+kill $PF_PID 2>/dev/null || true
+unset GRAFANA_PASS
+NAME                    SYNC STATUS   HEALTH STATUS
+cert-manager            Synced        Healthy
+cert-manager-config     Synced        Healthy
+cinder-csi              Synced        Healthy
+grafana                 Synced        Healthy
+ingress-smoke-test      Synced        Progressing
+monitoring-dashboards   Synced        Healthy
+prometheus              Synced        Healthy
+root                    Synced        Healthy
+traefik                 Synced        Healthy
+NAME                                DATA   AGE
+grafana-dashboard-k8s-health        1      56m
+grafana-dashboard-node-health       1      56m
+grafana-dashboard-platform-health   1      56m
+[1] 519100
+[{"id":4079880192385024,"uid":"scc26-k8s-health","orgId":1,"title":"Kubernetes Cluster Health","uri":"db/kubernetes-cluster-health","url":"/d/scc26-k8s-health/kubernetes-cluster-health","slug":"","type":"dash-db","tags":["kubernetes","scc26"],"isStarred":false,"sortMeta":0,"isDeleted":false},{"id":4079879592599552,"uid":"scc26-node-health","orgId":1,"title":"Node CPU, Memory \u0026 Disk","uri":"db/node-cpu-memory-and-disk","url":"/d/scc26-node-health/node-cpu-memory-and-disk","slug":"","type":"dash-db","tags":["nodes","scc26"],"isStarred":false,"sortMeta":0,"isDeleted":false},{"id":4079880746033152,"uid":"scc26-platform-health","orgId":1,"title":"Platform \u0026 Observability Health","uri":"db/platform-and-observability-health","url":"/d/scc26-platform-health/platform-and-observability-health","slug":"","type":"dash-db","tags":["platform","scc26"],"isStarred":false,"sortMeta":0,"isDeleted":false}]
+[rocky@k8s-cp-01 ~]$
+
+```
+---
+
